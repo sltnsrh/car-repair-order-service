@@ -1,6 +1,5 @@
 package com.salatin.orderservice.model;
 
-import com.salatin.userservice.model.status.OrderStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
