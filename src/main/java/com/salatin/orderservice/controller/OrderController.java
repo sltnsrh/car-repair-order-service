@@ -1,8 +1,10 @@
 package com.salatin.orderservice.controller;
 
+import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.dto.request.OrderCreateRequestDto;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import com.salatin.orderservice.service.OrderRegistrationService;
+import com.salatin.orderservice.service.mapper.OrderMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,11 +20,14 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderRegistrationService orderRegistrationService;
+    private final OrderMapper orderMapper;
 
     @PostMapping
     public Mono<OrderResponseDto> create(@RequestBody @Valid OrderCreateRequestDto requestDto,
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
+        Order order = orderMapper.toModel(requestDto);
 
-        return orderRegistrationService.register(null, authenticationToken);
+        return orderRegistrationService.register(order, authenticationToken)
+                .map(orderMapper::toDto);
     }
 }
