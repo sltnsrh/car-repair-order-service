@@ -13,17 +13,17 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     @Override
-    public Mono<Order> create(Order order) {
-        return orderRepository.save(order);
+    public Mono<Order> save(Order order) {
+        return orderRepository.save(order).log();
     }
 
     @Override
     public Mono<Void> delete(Order order) {
-        return orderRepository.delete(order);
+        return orderRepository.delete(order).log();
     }
 
     @Override
     public Mono<Order> findById(String id) {
-        return orderRepository.findById(id);
+        return orderRepository.findById(id).log();
     }
 }
