@@ -2,6 +2,7 @@ package com.salatin.orderservice.controller;
 
 import com.salatin.orderservice.model.dto.request.OrderCreateRequestDto;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
+import com.salatin.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,6 @@ public class OrderController {
     @PostMapping
     public Mono<OrderResponseDto> create(@RequestBody OrderCreateRequestDto requestDto) {
 
-        return orderService.create(requestDto);
+        return null;
     }
 }
