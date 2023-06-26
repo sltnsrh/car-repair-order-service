@@ -15,7 +15,7 @@
 	<description>order-service</description>
 
 	<properties>
-		<java.version>20</java.version>
+		<java.version>19</java.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<spring-cloud.version>2022.0.1</spring-cloud.version>
 	</properties>

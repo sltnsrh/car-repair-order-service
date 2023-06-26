@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @Getter
 public class OrderResponseDto {
-    private Long id;
+    private String id;
     private LocalDateTime createdAt;
     private LocalDateTime submittedAt;
     private LocalDateTime carReceivedAt;

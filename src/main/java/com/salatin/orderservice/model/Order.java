@@ -2,6 +2,8 @@ package com.salatin.orderservice.model;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,13 +11,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Document(collection = "orders")
 @Getter
 @Setter
-@Document(collection = "orders")
+@ToString
 public class Order {
     @Id
-    private Long id;
-//    @CreatedDate
+    private String id;
+    @CreatedDate
     private LocalDateTime createdAt;
     private LocalDateTime submittedAt;
     private LocalDateTime carReceivedAt;
