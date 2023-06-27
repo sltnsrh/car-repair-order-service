@@ -24,34 +24,33 @@ public class OrderRegistrationService {
     private final WebClient.Builder webClientBuilder;
 
     public Mono<Order> register(@NotNull Order order,
-                                @NotNull JwtAuthenticationToken authenticationToken) {
-        var bearerToken = "Bearer " + authenticationToken.getToken().getTokenValue();
+                                @NotNull JwtAuthenticationToken authentication) {
+        var bearerToken = "Bearer " + authentication.getToken().getTokenValue();
 
-        Mono<String> monoCustomerId = webClientBuilder.build().get()
+        return webClientBuilder.build()
+                .get()
                 .uri("http://car-service/cars/{carId}", order.getCarId())
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
                 .bodyToMono(Car.class)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Can't find a car with id: " + order.getCarId())))
-                .doOnNext(car -> {
-                    String customerId = car.getOwnerId();
-                    log.info("Retrieved customerId: {}", customerId);
-                })
-                .map(Car::getOwnerId);
+                .doOnNext(car -> log.info("Retrieved the car: {}", car))
+                .map(Car::getOwnerId)
+                .flatMap(ownerId -> {
+                    order.setCustomerId(ownerId);
 
-        var hasRoleManager = authenticationToken.getAuthorities().stream()
+                    if (hasRoleManager(authentication)) {
+                        return registerAsManager(order, authentication.getName());
+                    } else {
+                        return registerAsCustomer(order, authentication.getName());
+                    }
+                });
+    }
+
+    private boolean hasRoleManager(JwtAuthenticationToken authenticationToken) {
+        return authenticationToken.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_manager".equals(a.getAuthority()));
-
-        return monoCustomerId.flatMap(customerId -> {
-            order.setCustomerId(customerId);
-
-            if (hasRoleManager) {
-                return registerAsManager(order, authenticationToken.getName());
-            } else {
-                return registerAsCustomer(order, authenticationToken.getName());
-            }
-        });
     }
 
     private Mono<Order> registerAsManager(Order order, String managerId) {
