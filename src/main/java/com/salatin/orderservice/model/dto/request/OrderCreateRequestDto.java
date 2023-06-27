@@ -11,5 +11,4 @@ public class OrderCreateRequestDto {
     private String complaints;
     @NotBlank(message = "Car id field can't be empty")
     private String carId;
-    private String customerId;
 }
