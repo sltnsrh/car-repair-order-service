@@ -5,6 +5,7 @@ import com.salatin.orderservice.repository.OrderRepository;
 import com.salatin.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -25,5 +26,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Mono<Order> findById(String id) {
         return orderRepository.findById(id).log();
+    }
+
+    @Override
+    public Flux<Order> findByCarIdAndStatus(String carId, String status) {
+        return orderRepository.findAllByCarIdAndStatus(carId, status);
     }
 }

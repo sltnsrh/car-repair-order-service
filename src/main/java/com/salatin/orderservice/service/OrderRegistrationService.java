@@ -4,6 +4,7 @@ import com.salatin.orderservice.model.Car;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
@@ -13,8 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
 
 @Component
 @RequiredArgsConstructor
@@ -26,15 +25,17 @@ public class OrderRegistrationService {
     public Mono<Order> register(@NotNull Order order,
                                 @NotNull JwtAuthenticationToken authentication) {
         var bearerToken = "Bearer " + authentication.getToken().getTokenValue();
+        var carId = order.getCarId();
 
-        return webClientBuilder.build()
+        return checkIfCarHasNotOpenedOrders(carId)
+            .then(webClientBuilder.build()
                 .get()
-                .uri("http://car-service/cars/{carId}", order.getCarId())
+                .uri("http://car-service/cars/{carId}", carId)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
                 .bodyToMono(Car.class)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Can't find a car with id: " + order.getCarId())))
+                    "Can't find a car with id: " + carId)))
                 .doOnNext(car -> log.info("Retrieved the car: {}", car))
                 .map(Car::getOwnerId)
                 .flatMap(ownerId -> {
@@ -45,7 +46,20 @@ public class OrderRegistrationService {
                     } else {
                         return registerAsCustomer(order, authentication.getName());
                     }
-                });
+                }));
+    }
+
+    private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
+        return orderService.findByCarIdAndStatus(carId, OrderStatus.PAYED.name())
+            .collectList()
+            .flatMap(orders -> {
+                if (!orders.isEmpty()) {
+                    return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+                        "This car is already in the process of repairing"));
+                } else {
+                    return Mono.empty();
+                }
+            });
     }
 
     private boolean hasRoleManager(JwtAuthenticationToken authenticationToken) {
