@@ -53,11 +53,11 @@ public class OrderRegistrationService {
         return orderService.findByCarIdAndStatusNot(carId, OrderStatus.PAYED.name())
             .collectList()
             .flatMap(orders -> {
-                if (!orders.isEmpty()) {
-                    return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
-                        "This car is already in the process of repairing"));
-                } else {
+                if (orders.isEmpty()) {
                     return Mono.empty();
+                } else {
+                    return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+                            "This car is already in the process of repairing"));
                 }
             });
     }
