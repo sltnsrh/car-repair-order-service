@@ -50,7 +50,7 @@ public class OrderRegistrationService {
     }
 
     private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
-        return orderService.findByCarIdAndStatus(carId, OrderStatus.PAYED.name())
+        return orderService.findByCarIdAndStatusNot(carId, OrderStatus.PAYED.name())
             .collectList()
             .flatMap(orders -> {
                 if (!orders.isEmpty()) {

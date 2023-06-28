@@ -9,6 +9,5 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface OrderRepository extends ReactiveMongoRepository<Order, String> {
 
-    @Query("{ 'carId': ?0, 'status': ?1 }")
-    Flux<Order> findAllByCarIdAndStatus(String carId, String status);
+    Flux<Order> findAllByCarIdAndStatusNot(String carId, String status);
 }
