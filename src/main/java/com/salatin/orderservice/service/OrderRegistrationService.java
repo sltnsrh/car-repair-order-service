@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -33,6 +34,9 @@ public class OrderRegistrationService {
                 .uri("http://car-service/cars/{carId}", carId)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError,
+                    e -> Mono.error(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                        "Car-service temporary unavailable")))
                 .bodyToMono(Car.class)
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Can't find a car with id: " + carId)))
