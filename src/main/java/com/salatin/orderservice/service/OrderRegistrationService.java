@@ -3,7 +3,6 @@ package com.salatin.orderservice.service;
 import com.salatin.orderservice.model.Car;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
-import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -61,8 +60,19 @@ public class OrderRegistrationService {
                 "Can't find an order by id: " + orderId)))
             .doOnNext(order -> log.info("Retrieved the order: {}", order))
             .flatMap(order -> {
+                var orderStatus = order.getStatus();
+
+                if (clientIsManagerAndOrderStatusUnacceptable(authenticationToken, orderStatus)
+                || clientIsCustomerAndOrderStatusUnacceptable(authenticationToken, orderStatus)) {
+
+                    return Mono.error(new ResponseStatusException(HttpStatus.ACCEPTED,
+                        "You can't cancel the order, because it is already " + order.getStatus()));
+                }
                 order.setStatus(OrderStatus.CANCELED);
-                return orderService.save(order);
+                log.info("Order {} status was changed to {} by the user {}",
+                    order.getId(), order.getStatus(), authenticationToken.getName());
+
+                return orderService.save(order).log();
             });
     }
 
@@ -100,5 +110,18 @@ public class OrderRegistrationService {
 
         return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN,
                 "Sorry, you are not owner of this car"));
+    }
+
+    private boolean clientIsManagerAndOrderStatusUnacceptable(JwtAuthenticationToken authenticationToken,
+                                                              OrderStatus orderStatus) {
+        return hasRoleManager(authenticationToken)
+            && (orderStatus.equals(OrderStatus.PAYED)
+            || orderStatus.equals(OrderStatus.COMPLETED)
+            || orderStatus.equals(OrderStatus.CANCELED));
+    }
+
+    private boolean clientIsCustomerAndOrderStatusUnacceptable(JwtAuthenticationToken authenticationToken,
+                                                               OrderStatus orderStatus) {
+        return !hasRoleManager(authenticationToken) && !orderStatus.equals(OrderStatus.CREATED);
     }
 }
