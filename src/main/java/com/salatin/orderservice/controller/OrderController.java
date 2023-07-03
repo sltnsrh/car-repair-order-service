@@ -40,6 +40,7 @@ public class OrderController {
     public Mono<OrderResponseDto> cancel(@PathVariable(value = "orderId") String orderId,
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
 
-        return null;
+        return orderRegistrationService.cancel(orderId, authenticationToken)
+            .map(orderMapper::toDto);
     }
 }

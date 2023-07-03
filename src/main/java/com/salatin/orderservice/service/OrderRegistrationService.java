@@ -3,6 +3,7 @@ package com.salatin.orderservice.service;
 import com.salatin.orderservice.model.Car;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
+import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,18 @@ public class OrderRegistrationService {
                         return registerAsCustomer(order, authentication.getName());
                     }
                 }));
+    }
+
+    public Mono<Order> cancel(String orderId,
+                                         JwtAuthenticationToken authenticationToken) {
+        return orderService.findById(orderId)
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Can't find an order by id: " + orderId)))
+            .doOnNext(order -> log.info("Retrieved the order: {}", order))
+            .flatMap(order -> {
+                order.setStatus(OrderStatus.CANCELED);
+                return orderService.save(order);
+            });
     }
 
     private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
