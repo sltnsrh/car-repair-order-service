@@ -3,7 +3,7 @@ package com.salatin.orderservice.controller;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.dto.request.OrderCreateRequestDto;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
-import com.salatin.orderservice.service.OrderRegistrationService;
+import com.salatin.orderservice.service.OrderManagementService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
-    private final OrderRegistrationService orderRegistrationService;
+    private final OrderManagementService orderManagementService;
     private final OrderMapper orderMapper;
 
     @PostMapping
@@ -31,7 +31,7 @@ public class OrderController {
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
         Order order = orderMapper.toModel(requestDto);
 
-        return orderRegistrationService.register(order, authenticationToken)
+        return orderManagementService.register(order, authenticationToken)
                 .map(orderMapper::toDto);
     }
 
@@ -40,7 +40,7 @@ public class OrderController {
     public Mono<OrderResponseDto> cancel(@PathVariable(value = "orderId") String orderId,
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
 
-        return orderRegistrationService.cancel(orderId, authenticationToken)
+        return orderManagementService.cancel(orderId, authenticationToken)
             .map(orderMapper::toDto);
     }
 }

@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 @Log4j2
-public class OrderRegistrationService {
+public class OrderManagementService {
     private final OrderService orderService;
     private final WebClient.Builder webClientBuilder;
 
