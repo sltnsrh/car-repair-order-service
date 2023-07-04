@@ -56,8 +56,8 @@ public class OrderManagementService {
     public Mono<Order> cancel(String orderId,
                                          JwtAuthenticationToken authenticationToken) {
         return orderService.findById(orderId)
-//            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
-//                "Can't find an order by id: " + orderId)))
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Can't find an order by id: " + orderId)))
             .doOnNext(order -> log.info("Retrieved the order: {}", order))
             .flatMap(order -> {
                 var orderStatus = order.getStatus();
