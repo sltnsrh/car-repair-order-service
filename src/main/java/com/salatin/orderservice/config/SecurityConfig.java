@@ -16,13 +16,14 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityFilterChain(ServerHttpSecurity http) {
         http
-                .csrf().disable()
-                .authorizeExchange()
-                .pathMatchers("/orders/**").hasAnyRole("customer", "admin", "manager")
-                .anyExchange().authenticated()
-                .and()
-                .oauth2ResourceServer()
-                .jwt();
+            .csrf().disable()
+            .authorizeExchange()
+            .pathMatchers("/webjars/swagger-ui/**").permitAll()
+            .pathMatchers("/orders/**").hasAnyRole("customer", "admin", "manager")
+            .anyExchange().authenticated()
+            .and()
+            .oauth2ResourceServer()
+            .jwt();
 
         return http.build();
     }
