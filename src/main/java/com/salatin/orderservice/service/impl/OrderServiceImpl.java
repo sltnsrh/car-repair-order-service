@@ -4,7 +4,9 @@ import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.repository.OrderRepository;
 import com.salatin.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +27,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<Order> findById(String id) {
-        return orderRepository.findById(id).log();
+        return orderRepository.findById(id)
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Can't find an order with id: " + id)))
+            .log();
     }
 
     @Override
