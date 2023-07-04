@@ -12,5 +12,5 @@ public interface OrderService {
 
     Mono<Order> findById(String id);
 
-    Flux<Order> findByCarIdAndStatusNot(String carId, String status);
+    Flux<Order> findAllByCarId(String carId);
 }

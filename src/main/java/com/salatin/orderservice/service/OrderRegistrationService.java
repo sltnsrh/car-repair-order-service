@@ -77,7 +77,9 @@ public class OrderRegistrationService {
     }
 
     private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
-        return orderService.findByCarIdAndStatusNot(carId, OrderStatus.PAYED.name())
+        return orderService.findAllByCarId(carId)
+            .filter(order -> !order.getStatus().equals(OrderStatus.PAYED)
+                && !order.getStatus().equals(OrderStatus.CANCELED))
             .collectList()
             .flatMap(orders -> {
                 if (orders.isEmpty()) {

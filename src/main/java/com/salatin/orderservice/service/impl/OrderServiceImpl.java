@@ -29,7 +29,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Flux<Order> findByCarIdAndStatusNot(String carId, String status) {
-        return orderRepository.findAllByCarIdAndStatusNot(carId, status);
+    public Flux<Order> findAllByCarId(String carId) {
+        return orderRepository.findAllByCarId(carId);
     }
 }
