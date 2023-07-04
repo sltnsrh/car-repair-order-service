@@ -23,8 +23,8 @@ public class OrderManagementService {
     private final OrderService orderService;
     private final WebClient.Builder webClientBuilder;
 
-    public Mono<Order> register(@NotNull Order order,
-                                @NotNull JwtAuthenticationToken authentication) {
+    public Mono<Order> create(@NotNull Order order,
+                              @NotNull JwtAuthenticationToken authentication) {
         var bearerToken = "Bearer " + authentication.getToken().getTokenValue();
         var carId = order.getCarId();
 

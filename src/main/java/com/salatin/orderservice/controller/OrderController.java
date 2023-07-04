@@ -48,7 +48,7 @@ public class OrderController {
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
         Order order = orderMapper.toModel(requestDto);
 
-        return orderManagementService.register(order, authenticationToken)
+        return orderManagementService.create(order, authenticationToken)
             .map(orderMapper::toDto);
     }
 
