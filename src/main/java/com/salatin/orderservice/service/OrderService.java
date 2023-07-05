@@ -8,8 +8,6 @@ public interface OrderService {
 
     Mono<Order> save(Order order);
 
-    Mono<Void> delete(Order order);
-
     Mono<Order> findById(String id);
 
     Flux<Order> findAllByCarId(String carId);

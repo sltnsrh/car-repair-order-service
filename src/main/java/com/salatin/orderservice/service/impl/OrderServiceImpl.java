@@ -19,11 +19,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Mono<Void> delete(Order order) {
-        return orderRepository.delete(order).log();
-    }
-
-    @Override
     public Mono<Order> findById(String id) {
         return orderRepository.findById(id).log();
     }
