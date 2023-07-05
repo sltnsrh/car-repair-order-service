@@ -76,6 +76,12 @@ public class OrderManagementService {
             });
     }
 
+    public Mono<Order> getById(String orderId) {
+        return orderService.findById(orderId)
+            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "Can't find an order by id: " + orderId)));
+    }
+
     private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
         return orderService.findAllByCarId(carId)
             .filter(order -> !order.getStatus().equals(OrderStatus.PAYED)

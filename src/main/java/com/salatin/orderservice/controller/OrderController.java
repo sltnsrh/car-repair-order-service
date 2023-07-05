@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,8 +48,10 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
     @PreAuthorize(value = "hasAnyRole('manager', 'customer')")
-    public Mono<OrderResponseDto> create(@RequestBody @Valid OrderCreateRequestDto requestDto,
-                                         @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
+    public Mono<OrderResponseDto> create(@RequestBody @Valid
+                                         OrderCreateRequestDto requestDto,
+                                         @AuthenticationPrincipal
+                                         JwtAuthenticationToken authenticationToken) {
         Order order = orderMapper.toModel(requestDto);
 
         return orderManagementService.create(order, authenticationToken)
@@ -65,7 +68,7 @@ public class OrderController {
         @ApiResponse(responseCode = "202", description = "Current orders status doesn't allow to cancel it"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Access denied"),
-        @ApiResponse(responseCode = "404", description = "Can't find a order with id")
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id")
     })
     @PatchMapping("/{orderId}/cancel")
     @PreAuthorize(value = "hasAnyRole('manager', 'customer')")
@@ -73,6 +76,23 @@ public class OrderController {
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
 
         return orderManagementService.cancel(orderId, authenticationToken)
+            .map(orderMapper::toDto);
+    }
+
+    @Operation(
+        summary = "Find the order",
+        description = "Allows to find particular order by id"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Found successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id")
+    })
+    @GetMapping("/{orderId}")
+    @PreAuthorize(value = "hasAnyRole('manager', 'customer', 'mechanic')")
+    public Mono<OrderResponseDto> findById(@PathVariable String orderId) {
+        return orderManagementService.getById(orderId)
             .map(orderMapper::toDto);
     }
 }
