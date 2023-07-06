@@ -103,6 +103,16 @@ public class OrderController {
             .map(orderMapper::toDto);
     }
 
+    @Operation(
+        summary = "Find all orders",
+        description = "Retrieving all orders from DB with pagination"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     @GetMapping
     @PreAuthorize(value = "hasAnyRole('admin', 'manager', 'mechanic')")
     public Flux<OrderResponseDto> findAll(@RequestParam(defaultValue = "0") Integer page,
@@ -115,6 +125,16 @@ public class OrderController {
             .map(orderMapper::toDto);
     }
 
+    @Operation(
+        summary = "Find all orders by status",
+        description = "Retrieving all orders by their status from DB with pagination"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied")
+    })
     @GetMapping("/by-status")
     @PreAuthorize(value = "hasAnyRole('admin', 'manager', 'mechanic')")
     public Flux<OrderResponseDto> findAllByStatus(@RequestParam(defaultValue = "0") Integer page,
