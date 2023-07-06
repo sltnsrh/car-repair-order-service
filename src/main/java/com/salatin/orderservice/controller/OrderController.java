@@ -4,6 +4,7 @@ import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.dto.request.OrderCreateRequestDto;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import com.salatin.orderservice.service.OrderManagementService;
+import com.salatin.orderservice.service.OrderService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,8 +24,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -31,6 +36,7 @@ import reactor.core.publisher.Mono;
 @Tag(name = "Orders", description = "Orders management")
 public class OrderController {
     private final OrderManagementService orderManagementService;
+    private final OrderService orderService;
     private final OrderMapper orderMapper;
 
     @Operation(
@@ -93,6 +99,35 @@ public class OrderController {
     @PreAuthorize(value = "hasAnyRole('manager', 'customer', 'mechanic')")
     public Mono<OrderResponseDto> findById(@PathVariable String orderId) {
         return orderManagementService.getById(orderId)
+            .map(orderMapper::toDto);
+    }
+
+    @GetMapping
+    @PreAuthorize(value = "hasAnyRole('admin', 'manager', 'mechanic')")
+    public Flux<OrderResponseDto> findAll(@RequestParam(defaultValue = "0") Integer page,
+                                                  @RequestParam(defaultValue = "10") Integer size,
+                                                  @RequestParam(defaultValue = "createdAt") String sortByField,
+                                                  @RequestParam(defaultValue = "ASC") String direction) {
+        PageRequest pageRequest =
+            PageRequest.of(page, size,
+                Sort.Direction.valueOf(direction.toUpperCase()), sortByField);
+
+        return orderService.findAll(pageRequest)
+            .map(orderMapper::toDto);
+    }
+
+    @GetMapping("/by-status")
+    @PreAuthorize(value = "hasAnyRole('admin', 'manager', 'mechanic')")
+    public Flux<OrderResponseDto> findAllByStatus(@RequestParam(defaultValue = "0") Integer page,
+                                          @RequestParam(defaultValue = "10") Integer size,
+                                          @RequestParam(defaultValue = "createdAt") String sortByField,
+                                          @RequestParam(defaultValue = "ASC") String direction,
+                                          @RequestParam String status) {
+        PageRequest pageRequest =
+            PageRequest.of(page, size,
+                Sort.Direction.valueOf(direction.toUpperCase()), sortByField);
+
+        return orderService.findAllByStatus(pageRequest, status)
             .map(orderMapper::toDto);
     }
 }
