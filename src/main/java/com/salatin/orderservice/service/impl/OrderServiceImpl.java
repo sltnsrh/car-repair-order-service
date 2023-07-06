@@ -30,23 +30,22 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<Order> findAll(PageRequest pageRequest) {
-        var firstElement = pageRequest.getPageNumber() * pageRequest.getPageSize();
+        var firstElement = calculateFirstElement(pageRequest);
 
         return orderRepository.findAll(pageRequest.getSort())
             .skip(firstElement)
-            .limitRate(pageRequest.getPageSize());
+            .take(pageRequest.getPageSize());
     }
 
     @Override
     public Flux<Order> findAllByStatus(PageRequest pageRequest, String status) {
-        var firstElement = pageRequest.getPageNumber() * pageRequest.getPageSize();
+        var firstElement = calculateFirstElement(pageRequest);
         var statusOptional = getOrderStatus(status);
 
-        return statusOptional.map(orderStatus -> findAll(pageRequest)
-            .filter(order -> order.getStatus().equals(orderStatus))
+        return statusOptional.map(
+            orderStatus -> orderRepository.findAllByStatus(orderStatus, pageRequest.getSort())
             .skip(firstElement)
-            .limitRate(pageRequest.getPageSize()))
-
+            .take(pageRequest.getPageSize()))
             .orElseGet(() -> Flux.error(
             new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order status value")));
     }
@@ -56,6 +55,10 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAllByCarId(carId);
     }
 
+    private int calculateFirstElement(PageRequest pageRequest) {
+        return pageRequest.getPageNumber() * pageRequest.getPageSize();
+    }
+
     private Optional<OrderStatus> getOrderStatus(String status) {
         try {
             return Optional.of(OrderStatus.valueOf(status.toUpperCase()));
@@ -63,5 +66,4 @@ public class OrderServiceImpl implements OrderService {
             return Optional.empty();
         }
     }
-
 }

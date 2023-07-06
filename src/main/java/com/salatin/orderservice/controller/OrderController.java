@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -108,9 +109,7 @@ public class OrderController {
                                                   @RequestParam(defaultValue = "10") Integer size,
                                                   @RequestParam(defaultValue = "createdAt") String sortByField,
                                                   @RequestParam(defaultValue = "ASC") String direction) {
-        PageRequest pageRequest =
-            PageRequest.of(page, size,
-                Sort.Direction.valueOf(direction.toUpperCase()), sortByField);
+        PageRequest pageRequest = buildPageRequest(page, size, sortByField, direction);
 
         return orderService.findAll(pageRequest)
             .map(orderMapper::toDto);
@@ -123,11 +122,21 @@ public class OrderController {
                                           @RequestParam(defaultValue = "createdAt") String sortByField,
                                           @RequestParam(defaultValue = "ASC") String direction,
                                           @RequestParam String status) {
-        PageRequest pageRequest =
-            PageRequest.of(page, size,
-                Sort.Direction.valueOf(direction.toUpperCase()), sortByField);
+        PageRequest pageRequest = buildPageRequest(page, size, sortByField, direction);
 
         return orderService.findAllByStatus(pageRequest, status)
             .map(orderMapper::toDto);
+    }
+
+    private PageRequest buildPageRequest(Integer page,
+                                         Integer size,
+                                         String sortByField,
+                                         String direction) {
+        try {
+            return PageRequest.of(page, size,
+                    Sort.Direction.valueOf(direction.toUpperCase()), sortByField);
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 }
