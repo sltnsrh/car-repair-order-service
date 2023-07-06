@@ -20,12 +20,12 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Mono<Order> save(Order order) {
-        return orderRepository.save(order).log();
+        return orderRepository.save(order);
     }
 
     @Override
     public Mono<Order> findById(String id) {
-        return orderRepository.findById(id).log();
+        return orderRepository.findById(id);
     }
 
     @Override
@@ -34,8 +34,7 @@ public class OrderServiceImpl implements OrderService {
 
         return orderRepository.findAll(pageRequest.getSort())
             .skip(firstElement)
-            .limitRate(pageRequest.getPageSize())
-            .log();
+            .limitRate(pageRequest.getPageSize());
     }
 
     @Override
@@ -46,8 +45,7 @@ public class OrderServiceImpl implements OrderService {
         return statusOptional.map(orderStatus -> findAll(pageRequest)
             .filter(order -> order.getStatus().equals(orderStatus))
             .skip(firstElement)
-            .limitRate(pageRequest.getPageSize())
-            .log())
+            .limitRate(pageRequest.getPageSize()))
 
             .orElseGet(() -> Flux.error(
             new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid order status value")));
@@ -55,7 +53,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Flux<Order> findAllByCarId(String carId) {
-        return orderRepository.findAllByCarId(carId).log();
+        return orderRepository.findAllByCarId(carId);
     }
 
     private Optional<OrderStatus> getOrderStatus(String status) {
