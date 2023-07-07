@@ -6,6 +6,7 @@ import com.salatin.orderservice.model.OrderStatus;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.mongodb.core.aggregation.BooleanOperators;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -79,6 +80,26 @@ public class OrderManagementService {
 
     public Mono<Order> getById(String orderId) {
         return findByIdOrError(orderId);
+    }
+
+    public Mono<Order> startWorkOnOrder(String orderId, JwtAuthenticationToken authenticationToken) {
+        return getById(orderId)
+            .flatMap(order -> {
+                var status = order.getStatus();
+                if (status.equals(OrderStatus.CAR_RECEIVED)) {
+                    order.setStatus(OrderStatus.IN_PROGRESS);
+                    order.setStartedWorksAt(LocalDateTime.now());
+                    order.setMechanicId(authenticationToken.getName());
+                    return orderService.save(order);
+                } else if (status.equals(OrderStatus.SUSPENDED)) {
+                    order.setStatus(OrderStatus.IN_PROGRESS);
+                    return orderService.save(order);
+                } else {
+                    log.warn("Can't start working on car, because order is in status {}", status);
+
+                    return Mono.error(createConflictOrderStatusException(status.name()));
+                }
+            });
     }
 
     public Mono<Order> updateStatus(String orderId, String status) {

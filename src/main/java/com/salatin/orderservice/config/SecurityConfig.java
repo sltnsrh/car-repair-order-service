@@ -19,7 +19,6 @@ public class SecurityConfig {
             .csrf().disable()
             .authorizeExchange()
             .pathMatchers("/webjars/swagger-ui/**", "/v3/api-docs/**").permitAll()
-            .pathMatchers("/orders/**").hasAnyRole("customer", "admin", "manager")
             .anyExchange().authenticated()
             .and()
             .oauth2ResourceServer()
