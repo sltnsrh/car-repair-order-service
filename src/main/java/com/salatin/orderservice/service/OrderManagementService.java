@@ -62,6 +62,27 @@ public class OrderManagementService {
             });
     }
 
+    public Mono<Order> acceptReceivingCarByService(String orderId, JwtAuthenticationToken authenticationToken) {
+        return getById(orderId)
+            .flatMap(order -> {
+                if (order.getStatus().equals(OrderStatus.SUBMITTED)) {
+                    order.setStatus(OrderStatus.CAR_RECEIVED);
+                    order.setCarReceivedAt(LocalDateTime.now());
+                    return orderService.save(order);
+                } else {
+                    log.warn("Can't receive a car by manager {}. Order is in status {}",
+                        authenticationToken.getName(), order.getStatus());
+
+                    return Mono.error(createConflictOrderStatusException(order.getStatus().name()));
+                }
+            });
+    }
+
+    private ResponseStatusException createConflictOrderStatusException(String orderStatus) {
+        return new ResponseStatusException(HttpStatus.CONFLICT,
+            "You can't do it. Order currently is in status " + orderStatus);
+    }
+
     public Mono<Order> getById(String orderId) {
         return findByIdOrError(orderId);
     }

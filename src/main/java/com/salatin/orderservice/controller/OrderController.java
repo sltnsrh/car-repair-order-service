@@ -210,6 +210,26 @@ public class OrderController {
             .map(orderMapper::toDto);
     }
 
+    @Operation(
+        summary = "Accept car",
+        description = "When customer delivered a car, manager accepts receiving it by a repair shop"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Accepted successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id"),
+        @ApiResponse(responseCode = "409", description = "Order isn't in an appropriate status")
+    })
+    @PutMapping("/{orderId}/accept-car-receiving")
+    @PreAuthorize(value = "hasRole('manager')")
+    public Mono<OrderResponseDto> acceptCar(@PathVariable String orderId,
+                                         @AuthenticationPrincipal
+                                         JwtAuthenticationToken authenticationToken) {
+        return orderManagementService.acceptReceivingCarByService(orderId, authenticationToken)
+            .map(orderMapper::toDto);
+    }
+
     private PageRequest buildPageRequest(Integer page,
                                          Integer size,
                                          String sortByField,
