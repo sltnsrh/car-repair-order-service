@@ -13,4 +13,6 @@ public interface OrderRepository extends ReactiveMongoRepository<Order, String> 
     Flux<Order> findAllByCarId(String carId);
 
     Flux<Order> findAllByStatus(OrderStatus status, Sort sort);
+
+    Flux<Order> findAllByCustomerId(String customerId, Sort sort);
 }

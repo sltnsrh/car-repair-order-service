@@ -16,4 +16,6 @@ public interface OrderService {
     Flux<Order> findAllByStatus(PageRequest pageRequest, String status);
 
     Flux<Order> findAllByCarId(String carId);
+
+    Flux<Order> findAllByUser(String userId, PageRequest pageRequest);
 }

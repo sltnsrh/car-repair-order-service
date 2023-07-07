@@ -148,6 +148,28 @@ public class OrderController {
             .map(orderMapper::toDto);
     }
 
+    @Operation(
+        summary = "Find all by customer",
+        description = "Retrieving all orders by customer id from DB with pagination"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied")
+    })
+    @GetMapping("/customer/{userId}")
+    @PreAuthorize(value = "hasAnyRole('admin', 'manager', 'customer')")
+    public Flux<OrderResponseDto> findAllByCustomer(@PathVariable String userId,
+                                                @RequestParam(defaultValue = "0") Integer page,
+                                                @RequestParam(defaultValue = "10") Integer size
+                                                ) {
+        var pageRequest = buildPageRequest(page, size, "createdAt", "DESC");
+
+        return orderService.findAllByUser(userId, pageRequest)
+            .map(orderMapper::toDto);
+    }
+
     private PageRequest buildPageRequest(Integer page,
                                          Integer size,
                                          String sortByField,

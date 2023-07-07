@@ -55,6 +55,15 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAllByCarId(carId);
     }
 
+    @Override
+    public Flux<Order> findAllByUser(String userId, PageRequest pageRequest) {
+        var firstElement = calculateFirstElement(pageRequest);
+
+        return orderRepository.findAllByCustomerId(userId, pageRequest.getSort())
+            .skip(firstElement)
+            .take(pageRequest.getPageSize());
+    }
+
     private int calculateFirstElement(PageRequest pageRequest) {
         return pageRequest.getPageNumber() * pageRequest.getPageSize();
     }
