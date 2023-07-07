@@ -170,6 +170,25 @@ public class OrderController {
             .map(orderMapper::toDto);
     }
 
+    @Operation(
+        summary = "Update status",
+        description = "Setting a new order status by order id"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id")
+    })
+    @PatchMapping("/{orderId}/set-status")
+    @PreAuthorize(value = "hasAnyRole('admin', 'manager')")
+    public Mono<OrderResponseDto> setStatus(@PathVariable String orderId,
+                                            @RequestParam(value = "status") String status) {
+        return orderManagementService.updateStatus(orderId, status)
+            .map(orderMapper::toDto);
+    }
+
     private PageRequest buildPageRequest(Integer page,
                                          Integer size,
                                          String sortByField,

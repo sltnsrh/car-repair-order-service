@@ -48,6 +48,18 @@ public class OrderManagementService {
         return findByIdOrError(orderId);
     }
 
+    public Mono<Order> updateStatus(String orderId, String status) {
+        return orderService.findById(orderId)
+            .flatMap(order -> {
+                order.setStatus(OrderStatus.valueOf(status.toUpperCase()));
+                return orderService.save(order);
+            })
+            .onErrorMap(throwable -> {
+                throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, throwable.getMessage());
+            })
+            .switchIfEmpty(Mono.error(createOrderNotFoundException(orderId)));
+    }
+
     private Mono<Void> checkIfCarHasNotOpenedOrders(String carId) {
         return orderService.findAllByCarId(carId)
             .filter(order -> !order.getStatus().equals(OrderStatus.PAYED)
