@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -186,6 +187,26 @@ public class OrderController {
     public Mono<OrderResponseDto> setStatus(@PathVariable String orderId,
                                             @RequestParam(value = "status") String status) {
         return orderManagementService.updateStatus(orderId, status)
+            .map(orderMapper::toDto);
+    }
+
+    @Operation(
+        summary = "Submit order",
+        description = "Submitting an order by manager that was newly created by customer"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Submitted successfully"),
+        @ApiResponse(responseCode = "202", description = "Order isn't in an appropriate status"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Access denied"),
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id")
+    })
+    @PutMapping("/{orderId}/submit")
+    @PreAuthorize(value = "hasRole('manager')")
+    public Mono<OrderResponseDto> submit(@PathVariable String orderId,
+                                         @AuthenticationPrincipal
+                                         JwtAuthenticationToken authenticationToken) {
+        return orderManagementService.submitNewOrder(orderId, authenticationToken)
             .map(orderMapper::toDto);
     }
 

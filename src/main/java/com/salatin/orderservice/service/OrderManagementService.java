@@ -44,6 +44,24 @@ public class OrderManagementService {
             .log();
     }
 
+    public Mono<Order> submitNewOrder(String orderId, JwtAuthenticationToken authenticationToken) {
+        return getById(orderId)
+            .flatMap(order -> {
+                if (order.getStatus().equals(OrderStatus.CREATED)) {
+                    order.setStatus(OrderStatus.SUBMITTED);
+                    order.setSubmittedAt(LocalDateTime.now());
+                    order.setManagerId(authenticationToken.getName());
+                    return orderService.save(order);
+                } else {
+                    log.warn("Can't submit order by manager {}. Order is in status {}",
+                        authenticationToken.getName(), order.getStatus());
+
+                    return Mono.error(new ResponseStatusException(HttpStatus.ACCEPTED,
+                        "Order is in status " + order.getStatus() + ". You can't submit it now."));
+                }
+            });
+    }
+
     public Mono<Order> getById(String orderId) {
         return findByIdOrError(orderId);
     }
