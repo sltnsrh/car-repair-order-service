@@ -56,8 +56,7 @@ public class OrderManagementService {
                     log.warn("Can't submit order by manager {}. Order is in status {}",
                         authenticationToken.getName(), order.getStatus());
 
-                    return Mono.error(new ResponseStatusException(HttpStatus.ACCEPTED,
-                        "Order is in status " + order.getStatus() + ". You can't submit it now."));
+                    return Mono.error(createConflictOrderStatusException(order.getStatus().name()));
                 }
             });
     }
@@ -76,11 +75,6 @@ public class OrderManagementService {
                     return Mono.error(createConflictOrderStatusException(order.getStatus().name()));
                 }
             });
-    }
-
-    private ResponseStatusException createConflictOrderStatusException(String orderStatus) {
-        return new ResponseStatusException(HttpStatus.CONFLICT,
-            "You can't do it. Order currently is in status " + orderStatus);
     }
 
     public Mono<Order> getById(String orderId) {
@@ -170,6 +164,11 @@ public class OrderManagementService {
     private ResponseStatusException createOrderNotFoundException(String orderId) {
         return new ResponseStatusException(HttpStatus.NOT_FOUND,
             "Can't find an order with id: " + orderId);
+    }
+
+    private ResponseStatusException createConflictOrderStatusException(String orderStatus) {
+        return new ResponseStatusException(HttpStatus.CONFLICT,
+            "You can't do it. Order currently is in status " + orderStatus);
     }
 
     private Mono<Order> processCancellation(Order order,
