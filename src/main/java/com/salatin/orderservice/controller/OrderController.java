@@ -196,10 +196,10 @@ public class OrderController {
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Submitted successfully"),
-        @ApiResponse(responseCode = "202", description = "Order isn't in an appropriate status"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Access denied"),
-        @ApiResponse(responseCode = "404", description = "Can't find an order with id")
+        @ApiResponse(responseCode = "404", description = "Can't find an order with id"),
+        @ApiResponse(responseCode = "409", description = "Order isn't in an appropriate status")
     })
     @PutMapping("/{orderId}/submit")
     @PreAuthorize(value = "hasRole('manager')")
