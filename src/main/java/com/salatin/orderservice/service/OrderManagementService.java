@@ -102,6 +102,22 @@ public class OrderManagementService {
             });
     }
 
+    public Mono<Order> completeWork(String orderId, JwtAuthenticationToken token) {
+        return getById(orderId)
+            .flatMap(order -> {
+                var status = order.getStatus();
+                if (status.equals(OrderStatus.IN_PROGRESS)) {
+                    order.setStatus(OrderStatus.COMPLETED);
+                    order.setFinishedWorksAt(LocalDateTime.now());
+                    return orderService.save(order);
+                } else {
+                    log.warn("Can't complete work on the car, because order status is {}", status);
+
+                    return Mono.error(createConflictOrderStatusException(status.name()));
+                }
+            });
+    }
+
     public Mono<Order> updateStatus(String orderId, String status) {
         return orderService.findById(orderId)
             .flatMap(order -> {
