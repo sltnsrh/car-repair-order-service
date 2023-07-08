@@ -252,12 +252,11 @@ public class OrderController {
     }
 
     @Operation(
-        summary = "Start working on order",
-        description = "When a mechanic is ready, he accepts a car on a repair post "
-            + "and starts working on it"
+        summary = "Complete working on order",
+        description = "The mechanic confirms the completion of the work"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Started successfully"),
+        @ApiResponse(responseCode = "200", description = "Completed successfully"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Access denied"),
         @ApiResponse(responseCode = "404", description = "Can't find an order with id"),
