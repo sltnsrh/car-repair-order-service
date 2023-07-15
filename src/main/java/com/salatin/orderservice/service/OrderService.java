@@ -1,5 +1,6 @@
 package com.salatin.orderservice.service;
 
+import com.salatin.orderservice.model.LogMessage;
 import com.salatin.orderservice.model.Order;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
@@ -18,4 +19,6 @@ public interface OrderService {
     Flux<Order> findAllByCarId(String carId);
 
     Flux<Order> findAllByUser(String userId, PageRequest pageRequest);
+
+    void addLogToOrder(String orderId, LogMessage logMessage);
 }

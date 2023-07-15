@@ -1,11 +1,13 @@
 package com.salatin.orderservice.service.impl;
 
+import com.salatin.orderservice.model.LogMessage;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
 import com.salatin.orderservice.repository.OrderRepository;
 import com.salatin.orderservice.service.OrderService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
@@ -62,6 +65,22 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAllByCustomerId(userId, pageRequest.getSort())
             .skip(firstElement)
             .take(pageRequest.getPageSize());
+    }
+
+    @Override
+    public void addLogToOrder(String orderId, LogMessage logMessage) {
+        orderRepository.findById(orderId)
+                .flatMap(order -> {
+                    order.getLogs().add(logMessage);
+                    return orderRepository.save(order);
+                })
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Can't find order with id: " + orderId)))
+                .doOnSuccess(savedOrder -> log.info("A new message {} saved to order {}",
+                        logMessage,  orderId))
+                .doOnError(throwable -> log.warn("Failed to save log message to order {}",
+                        orderId))
+                .subscribe();
     }
 
     private int calculateFirstElement(PageRequest pageRequest) {

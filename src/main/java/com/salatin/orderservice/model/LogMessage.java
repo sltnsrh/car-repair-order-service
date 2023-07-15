@@ -1,10 +1,11 @@
 package com.salatin.orderservice.model;
 
 import java.time.LocalDateTime;
+import lombok.Data;
 
+@Data
 public class LogMessage {
-    private String id;
     private String from;
     private String text;
-    private LocalDateTime time;
+    private LocalDateTime time = LocalDateTime.now();
 }

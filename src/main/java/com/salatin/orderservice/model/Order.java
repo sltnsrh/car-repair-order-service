@@ -1,5 +1,6 @@
 package com.salatin.orderservice.model;
 
+import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -26,9 +27,9 @@ public class Order {
     private LocalDateTime finishedWorksAt;
     private LocalDateTime orderPaidAt;
     private LocalDateTime totalExecutionTime;
-    private List<Part> parts;
-    private List<Work> works;
-    private List<LogMessage> logs;
+    private List<Part> parts = new ArrayList<>();
+    private List<Work> works  = new ArrayList<>();
+    private List<LogMessage> logs = new ArrayList<>();
     private String complaints;
     private BigDecimal totalCost;
     private BigDecimal discount;
