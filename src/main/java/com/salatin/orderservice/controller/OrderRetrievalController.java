@@ -33,7 +33,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 @Tag(name = "Orders", description = "Orders management")
-public class OrderController {
+public class OrderRetrievalController {
     private final OrderManagementService orderManagementService;
     private final OrderService orderService;
     private final OrderMapper orderMapper;
