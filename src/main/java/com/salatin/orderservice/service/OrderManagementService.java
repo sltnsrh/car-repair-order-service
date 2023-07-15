@@ -2,7 +2,7 @@ package com.salatin.orderservice.service;
 
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
-import com.salatin.orderservice.util.RoleChecker;
+import com.salatin.orderservice.util.OrderResponseCreator;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,21 +17,10 @@ import reactor.core.publisher.Mono;
 @Log4j2
 public class OrderManagementService {
     private final OrderService orderService;
-
-    public Mono<Order> cancel(String orderId, JwtAuthenticationToken authenticationToken) {
-        return findByIdOrError(orderId)
-            .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Can't find an order by id: " + orderId)))
-            .doOnNext(order -> log.info("Retrieved the order: {}", order))
-            .flatMap(order -> processCancellation(order, authenticationToken))
-            .doOnNext(order -> log.info("Order {} status was changed to {} by the user {}",
-                order.getId(), order.getStatus(), authenticationToken.getName()))
-            .flatMap(orderService::save)
-            .log();
-    }
+    private final OrderRetrievalService orderRetrievalService;
 
     public Mono<Order> submitNewOrder(String orderId, JwtAuthenticationToken authenticationToken) {
-        return getById(orderId)
+        return orderRetrievalService.getById(orderId)
             .flatMap(order -> {
                 if (order.getStatus().equals(OrderStatus.CREATED)) {
                     order.setStatus(OrderStatus.SUBMITTED);
@@ -42,13 +31,16 @@ public class OrderManagementService {
                     log.warn("Can't submit order by manager {}. Order is in status {}",
                         authenticationToken.getName(), order.getStatus());
 
-                    return Mono.error(createConflictOrderStatusException(order.getStatus().name()));
+                    return Mono.error(
+                            OrderResponseCreator.createConflictOrderStatusException(order.getStatus().name()));
                 }
             });
     }
 
-    public Mono<Order> acceptReceivingCarByService(String orderId, JwtAuthenticationToken authenticationToken) {
-        return getById(orderId)
+    public Mono<Order> acceptReceivingCarByService(String orderId,
+                                                   JwtAuthenticationToken authenticationToken) {
+
+        return orderRetrievalService.getById(orderId)
             .flatMap(order -> {
                 if (order.getStatus().equals(OrderStatus.SUBMITTED)) {
                     order.setStatus(OrderStatus.CAR_RECEIVED);
@@ -58,17 +50,15 @@ public class OrderManagementService {
                     log.warn("Can't receive a car by manager {}. Order is in status {}",
                         authenticationToken.getName(), order.getStatus());
 
-                    return Mono.error(createConflictOrderStatusException(order.getStatus().name()));
+                    return Mono.error(
+                            OrderResponseCreator.createConflictOrderStatusException(
+                                    order.getStatus().name()));
                 }
             });
     }
 
-    public Mono<Order> getById(String orderId) {
-        return findByIdOrError(orderId);
-    }
-
     public Mono<Order> startWorkOnOrder(String orderId, JwtAuthenticationToken authenticationToken) {
-        return getById(orderId)
+        return orderRetrievalService.getById(orderId)
             .flatMap(order -> {
                 var status = order.getStatus();
                 if (status.equals(OrderStatus.CAR_RECEIVED)) {
@@ -82,13 +72,14 @@ public class OrderManagementService {
                 } else {
                     log.warn("Can't start working on car, because order is in status {}", status);
 
-                    return Mono.error(createConflictOrderStatusException(status.name()));
+                    return Mono.error(
+                            OrderResponseCreator.createConflictOrderStatusException(status.name()));
                 }
             });
     }
 
     public Mono<Order> completeWork(String orderId, JwtAuthenticationToken token) {
-        return getById(orderId)
+        return orderRetrievalService.getById(orderId)
             .flatMap(order -> {
                 var status = order.getStatus();
                 if (status.equals(OrderStatus.IN_PROGRESS)) {
@@ -98,7 +89,8 @@ public class OrderManagementService {
                 } else {
                     log.warn("Can't complete work on the car, because order status is {}", status);
 
-                    return Mono.error(createConflictOrderStatusException(status.name()));
+                    return Mono.error(
+                            OrderResponseCreator.createConflictOrderStatusException(status.name()));
                 }
             });
     }
@@ -112,50 +104,6 @@ public class OrderManagementService {
             .onErrorMap(throwable -> {
                 throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, throwable.getMessage());
             })
-            .switchIfEmpty(Mono.error(createOrderNotFoundException(orderId)));
-    }
-
-    private Mono<Order> findByIdOrError(String orderId) {
-        return orderService.findById(orderId)
-            .switchIfEmpty(Mono.error(() -> createOrderNotFoundException(orderId)));
-    }
-
-    private ResponseStatusException createOrderNotFoundException(String orderId) {
-        return new ResponseStatusException(HttpStatus.NOT_FOUND,
-            "Can't find an order with id: " + orderId);
-    }
-
-    private ResponseStatusException createConflictOrderStatusException(String orderStatus) {
-        return new ResponseStatusException(HttpStatus.CONFLICT,
-            "You can't do it. Order currently is in status " + orderStatus);
-    }
-
-    private Mono<Order> processCancellation(Order order,
-                                            JwtAuthenticationToken authenticationToken) {
-        OrderStatus orderStatus = order.getStatus();
-
-        if (clientIsManagerAndOrderStatusUnacceptable(authenticationToken, orderStatus)
-            || clientIsCustomerAndOrderStatusUnacceptable(authenticationToken, orderStatus)) {
-
-            return Mono.error(new ResponseStatusException(HttpStatus.ACCEPTED,
-                "You can't cancel the order because it is already " + order.getStatus()));
-        }
-
-        order.setStatus(OrderStatus.CANCELED);
-        return Mono.just(order);
-    }
-
-    private boolean clientIsManagerAndOrderStatusUnacceptable(JwtAuthenticationToken authenticationToken,
-                                                              OrderStatus orderStatus) {
-        return RoleChecker.hasRoleManager(authenticationToken)
-            && (orderStatus.equals(OrderStatus.PAYED)
-            || orderStatus.equals(OrderStatus.COMPLETED)
-            || orderStatus.equals(OrderStatus.CANCELED));
-    }
-
-    private boolean clientIsCustomerAndOrderStatusUnacceptable(JwtAuthenticationToken authenticationToken,
-                                                               OrderStatus orderStatus) {
-        return !RoleChecker.hasRoleManager(authenticationToken)
-                && !orderStatus.equals(OrderStatus.CREATED);
+            .switchIfEmpty(Mono.error(OrderResponseCreator.createOrderNotFoundException(orderId)));
     }
 }

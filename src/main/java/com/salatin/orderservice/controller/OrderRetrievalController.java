@@ -4,6 +4,7 @@ import com.salatin.orderservice.model.LogMessage;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import com.salatin.orderservice.service.OrderLogMessageProducer;
 import com.salatin.orderservice.service.OrderManagementService;
+import com.salatin.orderservice.service.OrderRetrievalService;
 import com.salatin.orderservice.service.OrderService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,7 @@ public class OrderRetrievalController {
     private final OrderService orderService;
     private final OrderMapper orderMapper;
     private final OrderLogMessageProducer messageProducer;
+    private final OrderRetrievalService orderRetrievalService;
 
     @Operation(
         summary = "Find the order",
@@ -52,7 +54,7 @@ public class OrderRetrievalController {
     @GetMapping("/{orderId}")
     @PreAuthorize(value = "hasAnyRole('manager', 'customer', 'mechanic')")
     public Mono<OrderResponseDto> findById(@PathVariable String orderId) {
-        return orderManagementService.getById(orderId)
+        return orderRetrievalService.getById(orderId)
             .map(orderMapper::toDto);
     }
 

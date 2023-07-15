@@ -1,6 +1,7 @@
 package com.salatin.orderservice.controller;
 
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
+import com.salatin.orderservice.service.OrderCancellationService;
 import com.salatin.orderservice.service.OrderManagementService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
 public class OrderManagementController {
     private final OrderManagementService orderManagementService;
     private final OrderMapper orderMapper;
+    private final OrderCancellationService orderCancellationService;
 
     @Operation(
             summary = "Cancel the order",
@@ -42,7 +44,7 @@ public class OrderManagementController {
     public Mono<OrderResponseDto> cancel(@PathVariable(value = "orderId") String orderId,
                                          @AuthenticationPrincipal JwtAuthenticationToken authenticationToken) {
 
-        return orderManagementService.cancel(orderId, authenticationToken)
+        return orderCancellationService.cancel(orderId, authenticationToken)
                 .map(orderMapper::toDto);
     }
 
