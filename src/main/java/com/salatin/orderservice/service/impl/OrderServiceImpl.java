@@ -74,8 +74,6 @@ public class OrderServiceImpl implements OrderService {
                     order.getLogs().add(logMessage);
                     return orderRepository.save(order);
                 })
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Can't find order with id: " + orderId)))
                 .doOnSuccess(savedOrder -> log.info("A new message {} saved to order {}",
                         logMessage,  orderId))
                 .doOnError(throwable -> log.warn("Failed to save log message to order {}",
