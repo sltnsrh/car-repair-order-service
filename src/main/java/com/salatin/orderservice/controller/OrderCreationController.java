@@ -3,7 +3,7 @@ package com.salatin.orderservice.controller;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.dto.request.OrderCreateRequestDto;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
-import com.salatin.orderservice.service.OrderManagementService;
+import com.salatin.orderservice.service.OrderCreationService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderCreationController {
-    private final OrderManagementService orderManagementService;
+    private final OrderCreationService orderCreationService;
     private final OrderMapper orderMapper;
 
     @Operation(
@@ -49,7 +49,7 @@ public class OrderCreationController {
                                          JwtAuthenticationToken authenticationToken) {
         Order order = orderMapper.toModel(requestDto);
 
-        return orderManagementService.create(order, authenticationToken)
+        return orderCreationService.create(order, authenticationToken)
                 .map(orderMapper::toDto);
     }
 }
