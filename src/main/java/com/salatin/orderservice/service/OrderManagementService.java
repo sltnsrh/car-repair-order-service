@@ -20,7 +20,7 @@ public class OrderManagementService {
     private final OrderRetrievalService orderRetrievalService;
 
     public Mono<Order> submitNewOrder(String orderId, JwtAuthenticationToken authenticationToken) {
-        return orderRetrievalService.getById(orderId)
+        return orderRetrievalService.findByIdOrError(orderId)
             .flatMap(order -> {
                 if (order.getStatus().equals(OrderStatus.CREATED)) {
                     order.setStatus(OrderStatus.SUBMITTED);
@@ -40,7 +40,7 @@ public class OrderManagementService {
     public Mono<Order> acceptReceivingCarByService(String orderId,
                                                    JwtAuthenticationToken authenticationToken) {
 
-        return orderRetrievalService.getById(orderId)
+        return orderRetrievalService.findByIdOrError(orderId)
             .flatMap(order -> {
                 if (order.getStatus().equals(OrderStatus.SUBMITTED)) {
                     order.setStatus(OrderStatus.CAR_RECEIVED);
@@ -58,7 +58,7 @@ public class OrderManagementService {
     }
 
     public Mono<Order> startWorkOnOrder(String orderId, JwtAuthenticationToken authenticationToken) {
-        return orderRetrievalService.getById(orderId)
+        return orderRetrievalService.findByIdOrError(orderId)
             .flatMap(order -> {
                 var status = order.getStatus();
                 if (status.equals(OrderStatus.CAR_RECEIVED)) {
@@ -79,7 +79,7 @@ public class OrderManagementService {
     }
 
     public Mono<Order> completeWork(String orderId, JwtAuthenticationToken token) {
-        return orderRetrievalService.getById(orderId)
+        return orderRetrievalService.findByIdOrError(orderId)
             .flatMap(order -> {
                 var status = order.getStatus();
                 if (status.equals(OrderStatus.IN_PROGRESS)) {

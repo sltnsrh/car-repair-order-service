@@ -11,10 +11,6 @@ import reactor.core.publisher.Mono;
 public class OrderRetrievalService {
     private final OrderService orderService;
 
-    public Mono<Order> getById(String orderId) {
-        return findByIdOrError(orderId);
-    }
-
     public Mono<Order> findByIdOrError(String orderId) {
         return orderService.findById(orderId)
                 .switchIfEmpty(Mono.error(() ->

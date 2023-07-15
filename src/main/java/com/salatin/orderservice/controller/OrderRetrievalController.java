@@ -3,7 +3,6 @@ package com.salatin.orderservice.controller;
 import com.salatin.orderservice.model.LogMessage;
 import com.salatin.orderservice.model.dto.response.OrderResponseDto;
 import com.salatin.orderservice.service.OrderLogMessageProducer;
-import com.salatin.orderservice.service.OrderManagementService;
 import com.salatin.orderservice.service.OrderRetrievalService;
 import com.salatin.orderservice.service.OrderService;
 import com.salatin.orderservice.service.mapper.OrderMapper;
@@ -35,7 +34,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Tag(name = "Orders", description = "Orders management")
 public class OrderRetrievalController {
-    private final OrderManagementService orderManagementService;
     private final OrderService orderService;
     private final OrderMapper orderMapper;
     private final OrderLogMessageProducer messageProducer;
@@ -54,7 +52,7 @@ public class OrderRetrievalController {
     @GetMapping("/{orderId}")
     @PreAuthorize(value = "hasAnyRole('manager', 'customer', 'mechanic')")
     public Mono<OrderResponseDto> findById(@PathVariable String orderId) {
-        return orderRetrievalService.getById(orderId)
+        return orderRetrievalService.findByIdOrError(orderId)
             .map(orderMapper::toDto);
     }
 

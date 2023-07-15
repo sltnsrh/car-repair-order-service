@@ -20,8 +20,6 @@ public class OrderCancellationService {
 
     public Mono<Order> cancel(String orderId, JwtAuthenticationToken authenticationToken) {
         return orderRetrievalService.findByIdOrError(orderId)
-                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Can't find an order by id: " + orderId)))
                 .doOnNext(order -> log.info("Retrieved the order: {}", order))
                 .flatMap(order -> processCancellation(order, authenticationToken))
                 .doOnNext(order -> log.info("Order {} status was changed to {} by the user {}",
