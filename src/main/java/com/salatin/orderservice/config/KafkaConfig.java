@@ -53,7 +53,8 @@ public class KafkaConfig {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG,groupMessageConsumerId);
-        props.put(JsonDeserializer.TRUSTED_PACKAGES,"com.salatin.orderservice.model");
+        props.put(JsonDeserializer.TRUSTED_PACKAGES,"com.salatin.*");
+        props.put(JsonDeserializer.TYPE_MAPPINGS, "message:com.salatin.orderservice.model.LogMessage");
 
         ReceiverOptions<String, LogMessage> basicReceiverOptions = ReceiverOptions.create(props);
 
