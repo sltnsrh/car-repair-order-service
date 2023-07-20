@@ -1,6 +1,6 @@
 package com.salatin.orderservice.service;
 
-import com.salatin.orderservice.model.LogMessage;
+import com.salatin.orderservice.model.dto.LogMessage;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

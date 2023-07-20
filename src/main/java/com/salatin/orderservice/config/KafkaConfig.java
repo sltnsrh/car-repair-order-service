@@ -1,6 +1,6 @@
 package com.salatin.orderservice.config;
 
-import com.salatin.orderservice.model.LogMessage;
+import com.salatin.orderservice.model.dto.LogMessage;
 import java.util.Collections;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -37,7 +37,7 @@ public class KafkaConfig {
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.GROUP_ID_CONFIG,groupMessageConsumerId);
         props.put(JsonDeserializer.TRUSTED_PACKAGES,"com.salatin.*");
-        props.put(JsonDeserializer.TYPE_MAPPINGS, "message:com.salatin.orderservice.model.LogMessage");
+        props.put(JsonDeserializer.TYPE_MAPPINGS, "message:com.salatin.orderservice.model.dto.LogMessage");
 
         ReceiverOptions<String, LogMessage> basicReceiverOptions = ReceiverOptions.create(props);
 

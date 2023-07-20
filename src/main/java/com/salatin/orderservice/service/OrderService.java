@@ -1,6 +1,6 @@
 package com.salatin.orderservice.service;
 
-import com.salatin.orderservice.model.LogMessage;
+import com.salatin.orderservice.model.dto.LogMessage;
 import com.salatin.orderservice.model.Order;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;

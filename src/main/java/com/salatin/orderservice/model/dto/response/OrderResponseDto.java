@@ -1,9 +1,9 @@
 package com.salatin.orderservice.model.dto.response;
 
-import com.salatin.orderservice.model.LogMessage;
+import com.salatin.orderservice.model.dto.LogMessage;
 import com.salatin.orderservice.model.OrderStatus;
-import com.salatin.orderservice.model.Part;
-import com.salatin.orderservice.model.Work;
+import com.salatin.orderservice.model.dto.Part;
+import com.salatin.orderservice.model.dto.Work;
 import lombok.Getter;
 import lombok.Setter;
 

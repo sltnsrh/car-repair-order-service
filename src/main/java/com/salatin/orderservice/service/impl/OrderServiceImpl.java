@@ -1,6 +1,6 @@
 package com.salatin.orderservice.service.impl;
 
-import com.salatin.orderservice.model.LogMessage;
+import com.salatin.orderservice.model.dto.LogMessage;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
 import com.salatin.orderservice.repository.OrderRepository;

@@ -1,5 +1,8 @@
 package com.salatin.orderservice.model;
 
+import com.salatin.orderservice.model.dto.LogMessage;
+import com.salatin.orderservice.model.dto.Part;
+import com.salatin.orderservice.model.dto.Work;
 import java.util.ArrayList;
 import lombok.Getter;
 import lombok.Setter;

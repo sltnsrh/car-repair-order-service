@@ -1,4 +1,4 @@
-package com.salatin.orderservice.model;
+package com.salatin.orderservice.model.dto;
 
 import lombok.Data;
 

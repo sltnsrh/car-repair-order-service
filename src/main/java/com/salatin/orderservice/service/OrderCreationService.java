@@ -1,6 +1,6 @@
 package com.salatin.orderservice.service;
 
-import com.salatin.orderservice.model.Car;
+import com.salatin.orderservice.model.dto.Car;
 import com.salatin.orderservice.model.Order;
 import com.salatin.orderservice.model.OrderStatus;
 import com.salatin.orderservice.util.RoleChecker;
